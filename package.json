@@ -3,6 +3,10 @@
   "displayName": "Acadnet Checker",
   "description": "",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acadnet-dev/vscode-checker-extension.git"
+  },
   "engines": {
     "vscode": "^1.79.0"
   },
