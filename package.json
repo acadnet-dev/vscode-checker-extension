@@ -16,12 +16,24 @@
   "activationEvents": [],
   "browser": "./dist/web/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "acadnet-checker.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "checker",
+          "title": "Acadnet Checker",
+          "icon": "media/check.svg"
+        }
+      ]
+    },
+    "views": {
+      "checker": [
+        {
+          "id": "checker-view",
+          "name": "Acadnet Checker",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",

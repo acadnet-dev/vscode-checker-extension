@@ -1,0 +1,13 @@
+body {
+	background-color: transparent;
+}
+
+.status {
+	font-weight: 600;
+	color: green;
+}
+
+.status-list {
+	list-style: none;
+	padding: 0;
+}
