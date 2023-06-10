@@ -7,15 +7,18 @@
 
     let status = document.querySelector('.status');
 
-    let statusList = document.querySelector('.status-list');
+    let errorsContainer = document.querySelector('.errors-container');
+    let elapsedSeconds = document.querySelector('.elapsed-seconds');
 
-    let statusHistory = document.querySelector('.status-history');
+    hideElement(errorsContainer);
+    hideElement(elapsedSeconds);
 
-    clearStatusList();
+    let counter = 0;
 
     document.querySelector('.check-problem').addEventListener('click', () => {
-        clearStatusList();
-        showElement(statusHistory);
+        hideElement(errorsContainer);
+        showElement(elapsedSeconds);
+        counter = 0;
         vscode.postMessage({ type: 'checkProblem' });
     });
 
@@ -25,23 +28,33 @@
         switch (message.type) {
             case 'setStatus':
                 {
+                    if (message.value === 'Failed') {
+                        status.style.color = 'red';
+                    } else if (message.value === 'Passed') {
+                        status.style.color = 'green';
+                    } else {
+                        status.style.color = 'yellow';
+                    }
+
                     status.textContent = message.value;
-                    addStatusItem(message.value);
+
+                    counter++;
+                    elapsedSeconds.textContent = 'Elapsed: ' + counter + ' sec';
+
                     break;
+                }
+            case 'showErrors':
+                {
+                    showElement(errorsContainer);
+                    let errors = message.value;
+                    errorsContainer.innerHTML = '<h3 class="red">Errors:</h3>';
+
+                    errors.forEach(error => {
+                        errorsContainer.innerHTML += '<div class="error-div"><p class="error-type">' + error.type + '</p><p class="error-p">' + error.message + '</p></div>';
+                    });
                 }
         }
     });
-
-    function addStatusItem(item) {
-        let li = document.createElement('li');
-        li.textContent = item;
-        statusList.appendChild(li);
-    }
-
-    function clearStatusList() {
-        statusList.innerHTML = '';
-        hideElement(statusHistory);
-    }
 
     function hideElement(element) {
         element.style.display = 'none';

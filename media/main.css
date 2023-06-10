@@ -4,10 +4,29 @@ body {
 
 .status {
 	font-weight: 600;
-	color: green;
 }
 
 .status-list {
 	list-style: none;
 	padding: 0;
+}
+
+.errors-container {
+	margin-top: 30px;
+}
+
+.error-p {
+	white-space: pre-line;
+}
+
+.red {
+	color: red;
+}
+
+.error-div {
+	margin-top: 10px;
+}
+
+.error-type {
+	font-weight: 600;
 }

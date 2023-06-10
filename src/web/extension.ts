@@ -82,6 +82,58 @@ class CheckerViewProvider implements vscode.WebviewViewProvider {
 					// send request to acadnet
 					this._outputChannel.appendLine("Sending request to Acadnet...");
 					this._outputChannel.appendLine("File size is " + content.byteLength);
+
+					// send request - we have workspaceId as cookie
+					fetch("https://acadnet.dev/problem/UploadSubmission", {
+						method: "POST",
+						body: formData
+					}).then(async (response) => {
+						// get submissionId from response (response is json)
+						let res = await response.json();
+
+						this._outputChannel.appendLine("Response is " + res);
+
+						this._outputChannel.appendLine("Submission ID is " + res.submissionId);
+
+						this.updateStatus("Checking problem...");
+
+						let checkInterval: ReturnType<typeof setInterval>;
+
+						checkInterval = setInterval(() => {
+							fetch('https://acadnet.dev/problem/CheckSubmission?submissionId=' + res.submissionId, {
+								method: "GET"
+							}).then(async (response) => {
+								let res = await response.json();
+
+								this._outputChannel.appendLine("Response is " + JSON.stringify(res));
+
+								// this._outputChannel.appendLine("Submission status is " + res.status);
+
+								this.updateStatus("Checking problem...");
+
+								if (res.status !== 'Pending') {
+									clearInterval(checkInterval);
+									this.updateStatus(res.status);
+
+									if (res.status === 'Failed') {
+										this._outputChannel.appendLine("Errors: " + JSON.stringify(res.errors));
+
+										this.showErrors(res.errors);
+									}
+								}
+							})
+							.catch((err) => {
+								this._outputChannel.appendLine("Error: " + err);
+								this.updateStatus("Error: " + err);
+								clearInterval(checkInterval);
+							});
+						  }, 1000);
+
+					})
+					.catch((err) => {
+						this._outputChannel.appendLine("Error: " + err);
+						this.updateStatus("Error: " + err);
+					});
 				});
 			} else {
 				this._outputChannel.appendLine("File main.cpp NOT found");
@@ -95,6 +147,15 @@ class CheckerViewProvider implements vscode.WebviewViewProvider {
 			this._view.webview.postMessage({
 				type: 'setStatus',
 				value: status
+			});
+		}
+	}
+
+	private showErrors(errors: any) {
+		if (this._view) {
+			this._view.webview.postMessage({
+				type: 'showErrors',
+				value: errors
 			});
 		}
 	}
@@ -136,9 +197,10 @@ class CheckerViewProvider implements vscode.WebviewViewProvider {
 
 				<h3>Status: <span class="status">Ready</span></h3>
 
-				<h4 class="status-history">Status history</h4>
-				<ul class="status-list">
-				</ul>
+				<h3 class="elapsed-seconds"></h3>
+
+				<div class="errors-container">
+				</div>
 
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
